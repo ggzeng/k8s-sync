@@ -1,0 +1,169 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    app: cloud-gateway-admin
+  name: gwadmin-serviceaccount
+  namespace: <ns>
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  labels:
+    app: cloud-gateway-admin
+  name: gwadmin-clusterrole
+  namespace: <ns>
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - endpoints
+  - nodes
+  - pods
+  - secrets
+  verbs:
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - nodes
+  verbs:
+  - get
+- apiGroups:
+  - ""
+  resources:
+  - services
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - networking.k8s.io
+  - extensions
+  - networking.internal.knative.dev
+  resources:
+  - ingresses
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+- apiGroups:
+  - networking.k8s.io
+  - extensions
+  - networking.internal.knative.dev
+  resources:
+  - ingresses/status
+  verbs:
+  - update
+- apiGroups:
+  - configuration.konghq.com
+  resources:
+  - tcpingresses/status
+  verbs:
+  - update
+- apiGroups:
+  - configuration.konghq.com
+  resources:
+  - kongplugins
+  - kongclusterplugins
+  - kongcredentials
+  - kongconsumers
+  - kongingresses
+  - tcpingresses
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs:
+  - create
+  - get
+  - update
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    app: cloud-gateway-gwadmin
+  name: gwadmin-clusterrole-binding
+  namespace: <ns>
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: gwadmin-clusterrole
+subjects:
+- kind: ServiceAccount
+  name: gwadmin-serviceaccount
+  namespace: <ns>
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: cloud-gateway-admin
+  name: gwadmin
+  namespace: <ns>
+spec:
+  ports:
+  - name: grpc
+    port: 8001
+    protocol: TCP
+    targetPort: 8001
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: 8000
+  selector:
+    app: cloud-gateway-admin
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: cloud-gateway-admin
+  name: cloud-gateway-admin
+  namespace: <ns>
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cloud-gateway-admin
+  template:
+    metadata:
+      labels:
+        app: cloud-gateway-admin
+    spec:
+      containers:
+      - command:
+        - /app/gwadmin
+        - daemon
+        image: registry-hz.rubikstack.com/lichen/cloud-gateway-admin:<image-tag>
+        name: gwadmin
+        ports:
+        - containerPort: 8001
+          name: grpc
+          protocol: TCP
+        - containerPort: 8000
+          name: http
+          protocol: TCP
+        volumeMounts:
+        - name: cloud-gateway-gwadmin
+          mountPath: "/app/configs"
+      serviceAccountName: gwadmin-serviceaccount
+      volumes:
+      - configMap:
+          name: cloud-gateway-gwadmin
+        name: cloud-gateway-gwadmin
+

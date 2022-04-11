@@ -1,0 +1,25 @@
+app:
+  host: 0.0.0.0
+  http-port: 8000
+  grpc-port: 8001
+  ishttps: false
+src:
+  kube-config: configs/settings.dev.yaml
+  namespace: default
+  objects:
+    - deployment
+    - service
+dst:
+  kube-config: configs/settings.dev.yaml
+  namespace: default
+log:
+  compress: false
+  consolestdout: true
+  filestdout: true
+  level: debug
+  localtime: true
+  maxage: 30
+  maxbackups: 300
+  maxsize: 10240
+  path: ./logs/k8sync.log
+  jsonformat: false
