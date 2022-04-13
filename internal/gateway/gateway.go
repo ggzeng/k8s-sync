@@ -13,7 +13,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/grpclog"
 
-	"k8sync/api/k8sync/v1"
+	"k8sync/gen/proto/k8sync/v1"
 	"k8sync/internal/config"
 	"k8sync/internal/process"
 	log "k8sync/pkg/logger"

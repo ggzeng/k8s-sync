@@ -29,10 +29,10 @@ $(TARGETS): $(GO_SRC) $(PROTO_SRC)
 	$(GO) build -o $@ -ldflags '$(LDFLAGS)' $(PROJECT)
 
 swagger: buf-lint gen
-	@cp api/k8sync/v1/k8sync.swagger.json third_party/OpenAPI/
+	@cp gen/k8sync.swagger.json third_party/OpenAPI/
 
 gen:
-	buf generate --path api
+	buf generate
 
 buf-lint:
 	buf lint
@@ -52,4 +52,4 @@ image-version:
 
 clean:
 	rm -f $(TARGETS)
-	rm -f api/k8sync/v1/*.go
+	rm -f gen/

@@ -3,7 +3,7 @@ package process
 import (
 	"sync"
 
-	"k8sync/api/k8sync/v1"
+	"k8sync/gen/proto/k8sync/v1"
 )
 
 // Health implements the protobuf interface
