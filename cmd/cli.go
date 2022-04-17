@@ -19,15 +19,17 @@ func cliStart(cmd *cobra.Command, args []string) {
 	}
 	srcK8 := k8client.New("src")
 	srcK8.SetNamespace(srcNamesapce)
+	logger.Infof("from src namespace: %s", srcNamesapce)
 	dstK8 := k8client.New("dst")
 	dstK8.SetNamespace(dstNamesapce)
+	logger.Infof("to  dest namespace: %s", dstNamesapce)
 	objs := config.GetStringSlice("src.objects")
 
 	for _, obj := range objs {
 		switch obj {
 		case "service":
 		case "deployment":
-			if err := process.SyncDeployment(srcK8, dstK8, srcNamesapce, dstNamesapce); err != nil {
+			if err := process.SyncDeployment(srcK8, dstK8); err != nil {
 				logger.Fatal(err)
 			}
 		}

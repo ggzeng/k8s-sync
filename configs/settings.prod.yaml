@@ -1,16 +1,17 @@
-application:
+app:
   host: 0.0.0.0
   http-port: 8000
   grpc-port: 8001
   ishttps: false
+  yaml: false
 src:
-  kube-config: configs/settings.dev.yaml
+  kube-config: ""
   namespace: default
   objects:
     - deployment
     - service
 dst:
-  kube-config: configs/settings.dev.yaml
+  kube-config: /Users/gavinz/.kube/config
   namespace: default
 log:
   compress: false

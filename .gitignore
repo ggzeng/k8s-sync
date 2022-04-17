@@ -30,3 +30,4 @@ logs/
 .deploy.yaml
 gen/
 k8sync
+temp/

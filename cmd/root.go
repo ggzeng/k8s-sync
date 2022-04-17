@@ -44,18 +44,22 @@ func Execute() {
 func init() {
 	PrintFullVersionInfo()
 	cobra.OnInitialize(initConfig)
-	rootCmd.PersistentFlags().StringVarP(&runMode, "mode", "m", "prod", "run mode with: prod, dev, test")
+	rootCmd.PersistentFlags().StringVarP(&runMode, "mode", "m", "cli", "run mode with: cli, prod, dev, test")
 	rootCmd.PersistentFlags().BoolVarP(&Verbose, "verbose", "v", false, "verbose output")
 	rootCmd.PersistentFlags().BoolVarP(&daemon, "daemon", "d", false, "run as daemon")
-	rootCmd.PersistentFlags().StringP("src-kube-config", "sc", "", "source kube config file")
-	rootCmd.PersistentFlags().StringP("src-namespace", "sn", "", "source k8s namespace")
-	rootCmd.PersistentFlags().StringArrayP("src-objects", "so", []string{"deployment", "service"}, "k8s object to sync")
-	rootCmd.PersistentFlags().StringP("dst-kube-config", "dc", "", "destination kube config file")
-	rootCmd.PersistentFlags().StringP("dst-namespace", "dn", "", "destination k8s namespace")
+	rootCmd.PersistentFlags().BoolP("yaml", "y", false, "export source cluster yaml")
+	rootCmd.PersistentFlags().StringP("src-kube-config", "", "", "source kube config file")
+	rootCmd.PersistentFlags().StringP("src-namespace", "n", "", "source k8s namespace")
+	rootCmd.PersistentFlags().StringArrayP("src-objects", "o", []string{"deployment", "service"}, "k8s object to sync")
+	rootCmd.PersistentFlags().StringP("dst-kube-config", "c", "", "destination kube config file")
+	rootCmd.PersistentFlags().StringP("dst-namespace", "", "", "destination k8s namespace")
+	if err := viper.BindPFlag("app.yaml", rootCmd.PersistentFlags().Lookup("yaml")); err != nil {
+		log.Fatal(err)
+	}
 	if err := viper.BindPFlag("src.kube-config", rootCmd.PersistentFlags().Lookup("src-kube-config")); err != nil {
 		log.Fatal(err)
 	}
-	if err := viper.BindPFlag("src.namespace", rootCmd.PersistentFlags().Lookup("src-kube-config")); err != nil {
+	if err := viper.BindPFlag("src.namespace", rootCmd.PersistentFlags().Lookup("src-namespace")); err != nil {
 		log.Fatal(err)
 	}
 	if err := viper.BindPFlag("src.objects", rootCmd.PersistentFlags().Lookup("src-objects")); err != nil {
@@ -64,7 +68,7 @@ func init() {
 	if err := viper.BindPFlag("dst.kube-config", rootCmd.PersistentFlags().Lookup("dst-kube-config")); err != nil {
 		log.Fatal(err)
 	}
-	if err := viper.BindPFlag("dst.kube-config", rootCmd.PersistentFlags().Lookup("dst-kube-config")); err != nil {
+	if err := viper.BindPFlag("dst.namespace", rootCmd.PersistentFlags().Lookup("dst-namespace")); err != nil {
 		log.Fatal(err)
 	}
 }
@@ -72,17 +76,21 @@ func init() {
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
 	var err error
-	cfg, err = config.New(runMode)
-	if err != nil {
-		fmt.Printf("FATAL: %s\n", err)
-		os.Exit(1)
+	if runMode == "cli" {
+		viper.SetDefault("log.consoleStdout", true)
+	} else {
+		cfg, err = config.New(runMode)
+		if err != nil {
+			fmt.Printf("FATAL with mode %s: %s\n", runMode, err)
+			os.Exit(1)
+		}
+		cfg.CheckMissingResourceEnvvars()
+		viper.SetConfigFile(cfg.GetFilename())
+		//viper.AddConfigPath(cfg.GetPath())
+		//viper.SetConfigType(cfg.GetFileType())
+		//viper.SetConfigName(cfg.GetFileBasename())
+		viper.SetEnvPrefix(cfg.GetEnvPrefix())
 	}
-	cfg.CheckMissingResourceEnvvars()
-	viper.SetConfigFile(cfg.GetFilename())
-	//viper.AddConfigPath(cfg.GetPath())
-	//viper.SetConfigType(cfg.GetFileType())
-	//viper.SetConfigName(cfg.GetFileBasename())
-	viper.SetEnvPrefix(cfg.GetEnvPrefix())
 	viper.AutomaticEnv()
 
 	// If a config file is found, read it in.

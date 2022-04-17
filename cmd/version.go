@@ -43,4 +43,5 @@ func PrintFullVersionInfo() {
 	fmt.Println("Git Branch:       ", GitBranch)
 	fmt.Println("Git Commit:       ", GitHash)
 	fmt.Println("Build Time (UTC): ", BuildTS)
+	fmt.Println("")
 }
