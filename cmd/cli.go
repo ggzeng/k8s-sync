@@ -28,6 +28,9 @@ func cliStart(cmd *cobra.Command, args []string) {
 	for _, obj := range objs {
 		switch obj {
 		case "service":
+			if err := process.SyncService(srcK8, dstK8); err != nil {
+				logger.Fatal(err)
+			}
 		case "deployment":
 			if err := process.SyncDeployment(srcK8, dstK8); err != nil {
 				logger.Fatal(err)

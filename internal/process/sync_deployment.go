@@ -45,7 +45,7 @@ func SyncDeployment(srcK8 *k8client.K8s, dstK8 *k8client.K8s) error {
 	for _, sd := range srcList.Items {
 		deployFilter(&sd)
 		if config.GetBool("app.yaml") {
-			exportYaml(srcK8.GetNamespace(), &sd)
+			exportDeployYaml(srcK8.GetNamespace(), &sd)
 		}
 		if _, ok := ddMap[sd.Name]; !ok {
 			logger.Infof("  create deployment: %s", sd.Name)
@@ -93,7 +93,7 @@ func deployFilter(d *appsv1.Deployment) {
 	d.ResourceVersion = ""
 }
 
-func exportYaml(ns string, d *appsv1.Deployment)  {
+func exportDeployYaml(ns string, d *appsv1.Deployment)  {
 
 	path := "yaml/"+ns
 	err := os.MkdirAll(path, 0750)
