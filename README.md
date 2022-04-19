@@ -1,9 +1,9 @@
 
-
 # introduction
+sync k8s objects between tow clusters
 
 # usage
-## 命令行模式，不需要配置文件
+## cli mode, no cfg file
 ```
 ./k8sync -c "/Users/gavinz/.kube/config" -n ss --dst-namespace dd -y
 ```
