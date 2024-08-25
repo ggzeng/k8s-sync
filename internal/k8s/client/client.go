@@ -2,7 +2,6 @@ package client
 
 import (
 	"github.com/spf13/viper"
-	"io/ioutil"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8sync/pkg/logger"
 	"os"
@@ -81,7 +80,7 @@ func (k *K8s) GetCurNamespace() string {
 		namespace, _, _ = kubeconfig.Namespace()
 		return namespace
 	}
-	if data, err := ioutil.ReadFile("/var/run/secrets/kubernetes.io/serviceaccount/namespace"); err == nil {
+	if data, err := os.ReadFile("/var/run/secrets/kubernetes.io/serviceaccount/namespace"); err == nil {
 		if namespace = strings.TrimSpace(string(data)); len(namespace) > 0 {
 			return namespace
 		}

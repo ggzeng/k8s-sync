@@ -53,6 +53,8 @@ func init() {
 	rootCmd.PersistentFlags().StringArrayP("src-objects", "o", []string{"deployment", "service"}, "k8s object to sync")
 	rootCmd.PersistentFlags().StringP("dst-kube-config", "c", "", "destination kube config file")
 	rootCmd.PersistentFlags().StringP("dst-namespace", "", "", "destination k8s namespace")
+	rootCmd.PersistentFlags().StringP("include", "i", "", "include object by name")
+	rootCmd.PersistentFlags().StringP("exclude", "e", "", "exclude object by name")
 	if err := viper.BindPFlag("app.yaml", rootCmd.PersistentFlags().Lookup("yaml")); err != nil {
 		log.Fatal(err)
 	}
@@ -68,7 +70,10 @@ func init() {
 	if err := viper.BindPFlag("dst.kube-config", rootCmd.PersistentFlags().Lookup("dst-kube-config")); err != nil {
 		log.Fatal(err)
 	}
-	if err := viper.BindPFlag("dst.namespace", rootCmd.PersistentFlags().Lookup("dst-namespace")); err != nil {
+	if err := viper.BindPFlag("dst.namespace", rootCmd.PersistentFlags().Lookup("include")); err != nil {
+		log.Fatal(err)
+	}
+	if err := viper.BindPFlag("src.include", rootCmd.PersistentFlags().Lookup("exclude")); err != nil {
 		log.Fatal(err)
 	}
 }

@@ -8,7 +8,7 @@ import (
 
 var (
 	BuildTS   = "None"
-	GitHash   = ""
+	GitHash   string
 	GitBranch = "None"
 	Version   = "None"
 )
@@ -17,9 +17,7 @@ var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "print version",
 	Long:  `print version`,
-	Run: func(cmd *cobra.Command, args []string) {
-		PrintFullVersionInfo()
-	},
+	Run:   func(cmd *cobra.Command, args []string) {},
 }
 
 func init() {

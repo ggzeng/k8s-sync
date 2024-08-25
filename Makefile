@@ -15,7 +15,7 @@ IMAGE_VERSION ?= $(IMAGE_NAME):$(BRANCH)-$(BUILD)-$(DATE)
 IMAGE_FULLNAME ?= $(REGISTRY_ADDRESS)/$(GROUP)/$(IMAGE_VERSION)
 
 VER_PKG = $(PROJECT)/cmd
-LDFLAGS += -X "$(VER_PKG).Version=$(VERSION)"
+LDFLAGS = -X "$(VER_PKG).Version=$(VERSION)"
 LDFLAGS += -X "$(VER_PKG).BuildTS=$(shell date -u '+%Y-%m-%d %I:%M:%S')"
 LDFLAGS += -X "$(VER_PKG).GitHash=$(shell git rev-parse HEAD)"
 LDFLAGS += -X "$(VER_PKG).GitBranch=$(shell git rev-parse --abbrev-ref HEAD)"
@@ -38,7 +38,7 @@ buf-lint:
 	buf lint
 
 go-lint:
-	golangci-lint run --deadline=5m
+	golangci-lint run
 
 image:
 	docker build . -t $(IMAGE_FULLNAME)
@@ -52,4 +52,4 @@ image-version:
 
 clean:
 	rm -f $(TARGETS)
-	rm -f gen/
+	rm -rf gen/

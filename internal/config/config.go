@@ -3,7 +3,7 @@ package config
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -98,7 +98,7 @@ func (c *Config) Load() error {
 		return err
 	}
 
-	b, err := ioutil.ReadAll(file)
+	b, err := io.ReadAll(file)
 	if err != nil {
 		return err
 	}
@@ -171,7 +171,7 @@ func GetInt(item string) int {
 	return viper.GetInt(item)
 }
 
-func GetBool(item string) bool{
+func GetBool(item string) bool {
 	return viper.GetBool(item)
 }
 

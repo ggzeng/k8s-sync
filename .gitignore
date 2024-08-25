@@ -21,12 +21,13 @@
 # Dependency directories (remove the comment below to include it)
 # vendor/
 
+logs/
+gen/
+temp/
 *.pb.go
 *.pb.gw.go
 *.pb.validate.go
 *.swagger.json
-logs/
 *.swp
 .deploy.yaml
-gen/
-temp/
+k8sync

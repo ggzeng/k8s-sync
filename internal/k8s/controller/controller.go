@@ -39,7 +39,7 @@ type Event struct {
 type Controller struct {
 	//k8s          *client.K8s
 	clientset    kubernetes.Interface
-	queue        workqueue.RateLimitingInterface
+	queue        workqueue.TypedRateLimitingInterface[Event]
 	informer     cache.SharedIndexInformer
 	eventHandler handler.Handler
 }
@@ -75,8 +75,8 @@ func newResourceController(client kubernetes.Interface, eventHandler handler.Han
 	var newEvent Event
 	var err error
 
-	queue := workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter())
-	informer.AddEventHandler(cache.ResourceEventHandlerFuncs{
+	queue := workqueue.NewTypedRateLimitingQueue[Event](workqueue.DefaultTypedControllerRateLimiter[Event]())
+	x, err := informer.AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc: func(obj interface{}) {
 			newEvent.key, err = cache.MetaNamespaceKeyFunc(obj)
 			newEvent.eventType = utils.EventTypeCreate
@@ -110,6 +110,10 @@ func newResourceController(client kubernetes.Interface, eventHandler handler.Han
 			}
 		},
 	})
+	if err != nil {
+		return nil
+	}
+	x.HasSynced() // wait for cache sync
 
 	return &Controller{
 		clientset:    client,
@@ -162,16 +166,16 @@ func (c *Controller) processNextItem() bool {
 	}
 	defer c.queue.Done(newEvent)
 
-	err := c.processItem(newEvent.(Event))
+	err := c.processItem(newEvent)
 	if err == nil {
 		// No error, reset the ratelimit counters
 		c.queue.Forget(newEvent)
 	} else if c.queue.NumRequeues(newEvent) < utils.MaxRetries {
-		logger.Errorf("processing %s failed (will retry): %v", newEvent.(Event).key, err)
+		logger.Errorf("processing %s failed (will retry): %v", newEvent.key, err)
 		c.queue.AddRateLimited(newEvent)
 	} else {
 		// err != nil and too many retries
-		logger.Errorf("processing %s over max %d retries (giving up): %v", newEvent.(Event).key, utils.MaxRetries, err)
+		logger.Errorf("processing %s over max %d retries (giving up): %v", newEvent.key, utils.MaxRetries, err)
 		c.queue.Forget(newEvent)
 		utilruntime.HandleError(err)
 	}

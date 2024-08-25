@@ -1,13 +1,6 @@
 run:
   build-tags:
     - nolic
-
-  tests: true
-
-  skip-dirs:
-    - api
-    - test
-
   linters:
     presets:
       - bugs
@@ -20,3 +13,9 @@ run:
       - gocritic
       - lll
       - unparam
+  tests: true
+
+issues:
+  exclude-dirs:
+    - api
+    - test

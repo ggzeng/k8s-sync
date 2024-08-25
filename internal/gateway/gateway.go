@@ -3,6 +3,7 @@ package gateway
 import (
 	"context"
 	"fmt"
+	"google.golang.org/grpc/credentials/insecure"
 	"io/fs"
 	"mime"
 	"net"
@@ -67,11 +68,10 @@ func startGrpcServer(ctx context.Context, grpcAddr string) {
 func startHttpServer(ctx context.Context, grpcAddr string) error {
 	// Create a client connection to the gRPC Server we just started.
 	// This is where the gRPC-Gateway proxies the requests.
-	conn, err := grpc.DialContext(
-		ctx,
+	conn, err := grpc.NewClient(
 		"dns:///"+grpcAddr,
-		grpc.WithInsecure(),
-		grpc.WithBlock(),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		//grpc.WithBlock(),
 	)
 	if err != nil {
 		return fmt.Errorf("failed to dial server: %w", err)
